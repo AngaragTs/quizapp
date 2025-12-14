@@ -6,6 +6,7 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { PiStarFourBold } from "react-icons/pi";
 import { useState } from "react";
 import { CgProfile } from "react-icons/cg";
+import { GoSidebarExpand } from "react-icons/go";
 
 export const HomeScreen = () => {
   const [sidebar, setSidebar] = useState(false);
@@ -23,13 +24,13 @@ export const HomeScreen = () => {
             onClick={() => setSidebar(false)}
           >
             <p className="text-xl font-semibold">History</p>
-            <GoSidebarCollapse className="text-black w-8 h-8" />
+            <GoSidebarExpand className="text-black w-8 h-8 cursor-pointer" />
           </div>
         )) || (
           <div className="h-full w-[4%] border-r-2 border-[#e4e4e7]  flex justify-center pt-5">
             <GoSidebarCollapse
               onClick={() => setSidebar(true)}
-              className="text-black w-8 h-8"
+              className="text-black w-8 h-8 cursor-pointer"
             />
           </div>
         )}
