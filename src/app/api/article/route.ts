@@ -1,5 +1,4 @@
 import prisma from "@/lib/prisma";
-import { request } from "http";
 
 export const POST = async (request: Request) => {
   const article = await prisma.article.create({

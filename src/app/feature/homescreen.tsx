@@ -10,6 +10,11 @@ import { GoSidebarExpand } from "react-icons/go";
 
 export const HomeScreen = () => {
   const [sidebar, setSidebar] = useState(false);
+  // const HandleGenerate = async () => {
+  //   try{
+  //     const res = await fetch("")
+  //   }
+  // }
   return (
     <div className="w-full h-screen bg-white">
       <div className="w-full h-15 flex border-b-2 items-center justify-between p-5">
