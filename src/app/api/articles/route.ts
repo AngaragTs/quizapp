@@ -1,5 +1,7 @@
 // import prisma from "@/lib/prisma";
 
+import prisma from "@/lib/prisma";
+
 // export const GET = async (request: Request) => {
 //   try {
 //     const article = await prisma.article.findMany();
@@ -16,8 +18,6 @@
 
 //   return new Response(JSON.stringify({ article }), { status: 201 });
 // };
-
-import { prisma } from "@/lib/prisma";
 
 export const GET = async () => {
   try {
@@ -40,7 +40,6 @@ export const POST = async (request: Request) => {
   try {
     const body = await request.json();
 
-    // Basic validation (recommended)
     if (!body.title || !body.content) {
       return new Response(
         JSON.stringify({ message: "Missing required fields" }),
@@ -49,10 +48,7 @@ export const POST = async (request: Request) => {
     }
 
     const article = await prisma.article.create({
-      data: {
-        title: body.title,
-        content: body.content,
-      },
+      data: {},
     });
 
     return new Response(JSON.stringify(article), {
