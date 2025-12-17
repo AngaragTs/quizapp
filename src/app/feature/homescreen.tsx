@@ -15,104 +15,102 @@ import {
   UserButton,
 } from "@clerk/nextjs";
 import { Summarize } from "./summarizescreen";
+import { Header } from "./header";
+import { Sidebar } from "./sidebar";
+
 
 export const HomeScreen = () => {
-  const [sidebar, setSidebar] = useState(false);
+ 
   const [step, setStep] = useState(1);
+  const [title, settitle] =  useState("")
+  const [content, setcontent] =  useState("")
+  const [error, setError] = useState("")
 
   const Handlenext = () => {
-    setStep(step + 1);
+    // if (!title.trim()) {
+    //   alert("Title is required");
+    //   return;
+    // }
+  
+    // if (!content.trim()) {
+    //   alert("Content is required");
+    //   return;
+    // }
+  
+    setStep(2);
   };
+  
+  
+  
 
   return (
-    <>
-      {step === 1 && (<div className="w-full h-screen bg-white">
-        <div className="w-full h-15 flex border-b-2 items-center justify-between p-5">
-          <p className="text-2xl font-semibold text-black ">Quiz app</p>
-          <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton>
-                <button className="bg-[#6c47ff] text-ceramic-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
-                  Sign Up
-                </button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
-        </div>
+    <div className="w-full h-screen bg-white flex flex-col">
+      <Header />
 
-        <div className="w-full h-full flex">
-          {(sidebar && (
-            <div
-              className="h-full w-80 border-r-2 border-[#e4e4e7] flex justify-between pt-5 p-5"
-              onClick={() => setSidebar(false)}
-            >
-              <p className="text-xl font-semibold">History</p>
-              <GoSidebarExpand className="text-black w-8 h-8 cursor-pointer" />
-            </div>
-          )) || (
-            <div className="h-full w-[4%] border-r-2 border-[#e4e4e7]  flex justify-center pt-5">
-              <GoSidebarCollapse
-                onClick={() => setSidebar(true)}
-                className="text-black w-8 h-8 cursor-pointer"
-              />
-            </div>
-          )}
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
 
-          <div className="w-full h-full flex  px-72 justify-center  pt-10">
-            <div className="w-214 h-110 border  rounded-xl flex justify-center">
-              <div className="flex-col">
-                <div className="w-200 h-15 flex gap-2 items-center">
-                  <PiStarFourBold className="text-black w-6 h-6" />
-
-                  <p className="font-semibold text-2xl text-black">
-                    Article Quiz Generator
-                  </p>
-                </div>
-                <div className="w-200 h-15">
-                  <p className="text-[#71717A] font-normal">
-                    Paste your article below to generate a summarize and quiz
-                    question. Your articles will saved in the sidebar for future
-                    reference.
-                  </p>
-                </div>
-                <div className="w-200 h-20 ">
-                  <div className="h-5 w-30 flex gap-2">
-                    <IoDocumentTextOutline className="text-black w-4 h-4" />
-                    <p className="text-[#71717A] font-semibold text-sm">
-                      Article Title
+        <div className="flex-1 overflow-auto">
+          {step === 1 && (
+            <div className="w-full h-full flex justify-center pt-10">
+              <div className="w-[856px] h-[440px] border rounded-xl flex justify-center">
+                <div className="flex flex-col gap-6 p-6">
+                  <div className="flex gap-2 items-center">
+                    <PiStarFourBold className="w-6 h-6" />
+                    <p className="font-semibold text-2xl">
+                      Article Quiz Generator
                     </p>
                   </div>
-                  <input
-                    placeholder="Enter a title for your article..."
-                    className="w-full h-10 border border-[#E4E4E7] rounded-xl text-black px-1"
-                  />
-                </div>
-                <div className="w-200 h-25 ">
-                  <div className="h-5 w-30 flex gap-2">
-                    <IoDocumentTextOutline className="text-black w-4 h-4" />
-                    <p className="text-[#71717A] font-semibold text-sm">
-                      Article Title
-                    </p>
+
+                  <p className="text-[#71717A]">
+                    Paste your article below to generate a summary and quiz
+                    questions. Your articles will be saved in the sidebar.
+                  </p>
+
+                  <div>
+                    <div className="flex gap-2 items-center mb-1">
+                      <IoDocumentTextOutline className="w-4 h-4" />
+                      <p className="text-sm font-semibold text-[#71717A]">
+                        Article Title
+                      </p>
+                    </div>
+                    <input
+                    onChange={(e) => settitle(e.target.value)}
+                      placeholder="Enter a title for your article..."
+                      className="w-full h-10 border rounded-xl px-2"
+                    />
                   </div>
-                  <Textarea
-                    placeholder="Paste your article content here..."
-                    className="w-full h-10 border border-[#E4E4E7] rounded-xl text-black px-1"
-                  />
-                </div>
-                <div className="w-200 h-20 flex items-end justify-end">
-                  <button className="w-40 h-10 border rounded-xl cursor-pointer bg-black">
-                    <p className="text-white">Generate summary</p>
-                  </button>
+
+                  <div>
+                    <div className="flex gap-2 items-center mb-1">
+                      <IoDocumentTextOutline className="w-4 h-4" />
+                      <p className="text-sm font-semibold text-[#71717A]">
+                        Article Content
+                      </p>
+                    </div>
+                    <Textarea
+                    onChange={(e)=> setcontent(e.target.value)}
+                      placeholder="Paste your article content here..."
+                      className="w-full h-32 border rounded-xl px-2"
+                    />
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      onClick={Handlenext}
+                      className="w-40 h-10 rounded-xl bg-black text-white cursor-pointer"
+                    >
+                      Generate summary
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {step === 2 && <Summarize  />}
         </div>
-      </div>)
-    </>
+      </div>
+    </div>
   );
 };

@@ -16,8 +16,13 @@ import { PiBookOpenLight } from "react-icons/pi";
 import { HiChevronLeft } from "react-icons/hi2";
 
 export const Summarize = () => {
-  const [sidebar, setSidebar] = useState(false);
+  const [step, setStep] = useState(2)
   const [seecontent, setseecontent] = useState(false);
+
+const HandleBack = () => {
+  setStep (step - 1)
+}
+
   return (
     <div className="w-full h-screen bg-white">
       {seecontent && (
@@ -27,45 +32,14 @@ export const Summarize = () => {
           </div>
         </div>
       )}
-      <div className="w-full h-15 flex border-b-2 items-center justify-between p-5">
-        <p className="text-2xl font-semibold text-black ">Quiz app</p>
-        <header className="flex justify-end items-center p-4 gap-4 h-16">
-          <SignedOut>
-            <SignInButton />
-            <SignUpButton>
-              <button className="bg-[#6c47ff] text-ceramic-white rounded-full font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 cursor-pointer">
-                Sign Up
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <UserButton />
-          </SignedIn>
-        </header>
-      </div>
 
       <div className="w-full h-full flex">
-        {(sidebar && (
-          <div
-            className="h-full w-80 border-r-2 border-[#e4e4e7] flex justify-between pt-5 p-5"
-            onClick={() => setSidebar(false)}
-          >
-            <p className="text-xl font-semibold">History</p>
-            <GoSidebarExpand className="text-black w-8 h-8 cursor-pointer" />
-          </div>
-        )) || (
-          <div className="h-full w-[4%] border-r-2 border-[#e4e4e7]  flex justify-center pt-5">
-            <GoSidebarCollapse
-              onClick={() => setSidebar(true)}
-              className="text-black w-8 h-8 cursor-pointer"
-            />
-          </div>
-        )}
-
         <div className="w-full h-full flex flex-col px-72 items-center pt-10 ">
           <div className="w-214 mb-10">
-            {" "}
-            <button className="w-12 h-12 bg-white border rounded-xl flex items-center justify-center cursor-pointer">
+            <button
+             onClick={HandleBack}
+              className="w-12 h-12 bg-white border rounded-xl flex items-center justify-center cursor-pointer"
+            >
               <HiChevronLeft />
             </button>
           </div>
