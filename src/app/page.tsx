@@ -9,8 +9,8 @@ export default async function Home() {
 
   return (
     <div>
-      {/* <HomeScreen /> */}
-      <Quiz />
+      <HomeScreen />
+      {/* <Quiz /> */}
     </div>
   );
 }

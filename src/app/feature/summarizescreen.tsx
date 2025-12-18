@@ -18,10 +18,13 @@ import { IoMdClose } from "react-icons/io";
 import Link from "next/link";
 
 type SummarizeProps = {
+  
   setStep: React.Dispatch<React.SetStateAction<number>>;
 };
-export const Summarize = ({ setStep }: SummarizeProps) => {
+export const Summarize = ({ setStep, }: SummarizeProps) => {
   const [seecontent, setseecontent] = useState(false);
+
+  
 
   // const HandleBack = () => {
   //   setStep (step - 1)

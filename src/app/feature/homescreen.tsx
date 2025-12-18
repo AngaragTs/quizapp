@@ -17,6 +17,7 @@ import {
 import { Summarize } from "./summarizescreen";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
+import { Quiz } from "./quiz";
 
 export const HomeScreen = () => {
   const [step, setStep] = useState(1);
@@ -124,6 +125,7 @@ export const HomeScreen = () => {
           )}
 
           {step === 2 && <Summarize setStep={setStep} />}
+          {step === 3 && <Quiz />}
         </div>
       </div>
     </div>
