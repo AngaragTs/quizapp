@@ -18,30 +18,27 @@ import { Summarize } from "./summarizescreen";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
 
-
 export const HomeScreen = () => {
- 
   const [step, setStep] = useState(1);
-  const [title, settitle] =  useState("")
-  const [content, setcontent] =  useState("")
-  const [error, setError] = useState("")
+  const [title, settitle] = useState("");
+  const [content, setcontent] = useState("");
+  const [error, setError] = useState({
+    title: "",
+    content: "",
+  });
 
   const Handlenext = () => {
-    // if (!title.trim()) {
-    //   alert("Title is required");
-    //   return;
-    // }
-  
-    // if (!content.trim()) {
-    //   alert("Content is required");
-    //   return;
-    // }
-  
+    if (!title.trim() && !content.trim()) {
+      setError({
+        title: "Article title is required",
+        content: "Article content is required",
+      });
+      return;
+    }
+
+    setError({ title: "", content: "" });
     setStep(2);
   };
-  
-  
-  
 
   return (
     <div className="w-full h-screen bg-white flex flex-col">
@@ -52,8 +49,8 @@ export const HomeScreen = () => {
 
         <div className="flex-1 overflow-auto">
           {step === 1 && (
-            <div className="w-full h-full flex justify-center pt-10">
-              <div className="w-[856px] h-[440px] border rounded-xl flex justify-center">
+            <div className="w-full max-h-max flex justify-center pt-10">
+              <div className="w-[856px] max-h-max border rounded-xl flex justify-center">
                 <div className="flex flex-col gap-6 p-6">
                   <div className="flex gap-2 items-center">
                     <PiStarFourBold className="w-6 h-6" />
@@ -75,10 +72,18 @@ export const HomeScreen = () => {
                       </p>
                     </div>
                     <input
-                    onChange={(e) => settitle(e.target.value)}
+                      onChange={(e) => {
+                        settitle(e.target.value);
+                        setError((prev) => ({ ...prev, title: "" }));
+                      }}
                       placeholder="Enter a title for your article..."
                       className="w-full h-10 border rounded-xl px-2"
+                      value={title}
                     />
+
+                    {error.title && (
+                      <p className="text-red-500 text-xs mt-1">{error.title}</p>
+                    )}
                   </div>
 
                   <div>
@@ -89,10 +94,20 @@ export const HomeScreen = () => {
                       </p>
                     </div>
                     <Textarea
-                    onChange={(e)=> setcontent(e.target.value)}
+                      value={content}
+                      onChange={(e) => {
+                        setcontent(e.target.value);
+                        setError((prev) => ({ ...prev, content: "" }));
+                      }}
                       placeholder="Paste your article content here..."
                       className="w-full h-32 border rounded-xl px-2"
                     />
+
+                    {error.content && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {error.content}
+                      </p>
+                    )}
                   </div>
 
                   <div className="flex justify-end">
@@ -108,7 +123,7 @@ export const HomeScreen = () => {
             </div>
           )}
 
-          {step === 2 && <Summarize  />}
+          {step === 2 && <Summarize setStep={setStep} />}
         </div>
       </div>
     </div>

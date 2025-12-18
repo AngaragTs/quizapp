@@ -14,20 +14,34 @@ import { IoDocumentTextOutline } from "react-icons/io5";
 import { PiStarFourBold } from "react-icons/pi";
 import { PiBookOpenLight } from "react-icons/pi";
 import { HiChevronLeft } from "react-icons/hi2";
+import { IoMdClose } from "react-icons/io";
+import Link from "next/link";
 
-export const Summarize = () => {
-  const [step, setStep] = useState(2)
+type SummarizeProps = {
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+};
+export const Summarize = ({ setStep }: SummarizeProps) => {
   const [seecontent, setseecontent] = useState(false);
 
-const HandleBack = () => {
-  setStep (step - 1)
-}
+  // const HandleBack = () => {
+  //   setStep (step - 1)
+  // }
 
   return (
     <div className="w-full h-screen bg-white">
       {seecontent && (
         <div className="fixed w-screen h-screen bg-black/60 flex justify-center items-center ">
-          <div className="bg-white w-115 h-68 flex justify-around flex-col items-center rounded-2xl">
+          <div className="bg-white w-115 h-68 flex  flex-col items-center rounded-2xl">
+            <div className="w-111 flex justify-between">
+              <div className="w-50 ">asdfsfadf</div>
+
+              <button
+                onClick={() => setseecontent(false)}
+                className="w-12 h-10 border flex items-center justify-center cursor-pointer rounded-xl"
+              >
+                <IoMdClose />
+              </button>
+            </div>
             sdgdgsdgdgsgsgsfdgfsdg
           </div>
         </div>
@@ -37,8 +51,8 @@ const HandleBack = () => {
         <div className="w-full h-full flex flex-col px-72 items-center pt-10 ">
           <div className="w-214 mb-10">
             <button
-             onClick={HandleBack}
               className="w-12 h-12 bg-white border rounded-xl flex items-center justify-center cursor-pointer"
+              onClick={() => setStep(1)}
             >
               <HiChevronLeft />
             </button>
