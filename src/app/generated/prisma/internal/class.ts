@@ -23,7 +23,7 @@ const config: runtime.GetPrismaClientConfig = {
       "value": "prisma-client"
     },
     "output": {
-      "value": "/Users/25LP7649/Desktop/quizapp/quizapp/generated/prisma",
+      "value": "/Users/25LP7649/quizapp/src/app/generated/prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -37,16 +37,17 @@ const config: runtime.GetPrismaClientConfig = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/25LP7649/Desktop/quizapp/quizapp/prisma/schema.prisma",
+    "sourceFilePath": "/Users/25LP7649/quizapp/prisma/schema.prisma",
     "isCustomOutput": true
   },
-  "relativePath": "../../prisma",
+  "relativePath": "../../../../prisma",
   "clientVersion": "6.19.1",
   "engineVersion": "c2990dca591cba766e3b7ef5d9e8a84796e47ab7",
   "datasourceNames": [
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
@@ -55,8 +56,8 @@ const config: runtime.GetPrismaClientConfig = {
       }
     }
   },
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Article {\n  id      String @id @default(cuid())\n  title   String\n  content String\n  summary String\n\n  userId String\n  user   User   @relation(fields: [userId], references: [id])\n\n  quizzes Quiz[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel User {\n  id      String  @id @default(cuid())\n  clerkId String  @unique\n  email   String  @unique\n  name    String?\n\n  articles     Article[]\n  quizAttempts QuizAttempt[]\n  userScores   UserScores[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel Quiz {\n  id       String   @id @default(cuid())\n  question String\n  options  String[]\n  answer   String\n\n  articleId String\n  article   Article @relation(fields: [articleId], references: [id])\n\n  quizAttempts QuizAttempt[]\n  userScores   UserScores[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel QuizAttempt {\n  id String @id @default(cuid())\n\n  userId String\n  quizId String\n\n  user User @relation(fields: [userId], references: [id])\n  quiz Quiz @relation(fields: [quizId], references: [id])\n}\n\nmodel UserScores {\n  id String @id @default(cuid())\n\n  userId String\n  quizId String\n\n  totalScore Int\n\n  user User @relation(fields: [userId], references: [id])\n  quiz Quiz @relation(fields: [quizId], references: [id])\n}\n",
-  "inlineSchemaHash": "55027e8e5609f05be475159898faef3f2cdb6a68422c50a6fe99b298930c8fb7",
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../src/app/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n  url      = env(\"DATABASE_URL\")\n}\n\nmodel Article {\n  id      String @id @default(cuid())\n  title   String\n  content String\n  summary String\n\n  userId String\n  user   User   @relation(fields: [userId], references: [id])\n\n  quizzes Quiz[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel User {\n  id      String  @id @default(cuid())\n  clerkId String  @unique\n  email   String  @unique\n  name    String?\n\n  articles     Article[]\n  quizAttempts QuizAttempt[]\n  userScores   UserScores[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel Quiz {\n  id       String   @id @default(cuid())\n  question String\n  options  String[]\n  answer   String\n\n  articleId String\n  article   Article @relation(fields: [articleId], references: [id])\n\n  quizAttempts QuizAttempt[]\n  userScores   UserScores[]\n\n  createdAt DateTime @default(now())\n  updatedAt DateTime @updatedAt\n}\n\nmodel QuizAttempt {\n  id String @id @default(cuid())\n\n  userId String\n  quizId String\n\n  user User @relation(fields: [userId], references: [id])\n  quiz Quiz @relation(fields: [quizId], references: [id])\n}\n\nmodel UserScores {\n  id String @id @default(cuid())\n\n  userId String\n  quizId String\n\n  totalScore Int\n\n  user User @relation(fields: [userId], references: [id])\n  quiz Quiz @relation(fields: [quizId], references: [id])\n}\n",
+  "inlineSchemaHash": "6ad9f5db17fcf09ff3d5d8e8ced90f23a90f223c31305c7dfd9831ae7d760b34",
   "copyEngine": true,
   "runtimeDataModel": {
     "models": {},

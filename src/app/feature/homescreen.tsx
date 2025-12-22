@@ -1,48 +1,86 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { GoSidebarCollapse } from "react-icons/go";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { PiStarFourBold } from "react-icons/pi";
 import { useState } from "react";
-import { CgProfile } from "react-icons/cg";
-import { GoSidebarExpand } from "react-icons/go";
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
+
 import { Summarize } from "./summarizescreen";
 import { Header } from "./header";
 import { Sidebar } from "./sidebar";
-import { Quiz } from "./quiz";
-
+type SummarizeProps = {
+  summary: string;
+  title: string;
+  content: string;
+};
 export const HomeScreen = () => {
+  const { user } = useUser();
+
   const [step, setStep] = useState(1);
-  const [title, settitle] = useState("");
-  const [content, setcontent] = useState("");
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [summary, setSummary] = useState<SummarizeProps | null>(null);
+
   const [error, setError] = useState({
     title: "",
     content: "",
+    api: "",
   });
 
-  const Handlenext = () => {
-    if (!title.trim() && !content.trim()) {
+  const handleNext = async () => {
+    // Validation
+    if (!title.trim() || !content.trim()) {
       setError({
-        title: "Article title is required",
-        content: "Article content is required",
+        title: !title ? "Article title is required" : "",
+        content: !content ? "Article content is required" : "",
+        api: "",
       });
       return;
     }
 
-    setError({ title: "", content: "" });
-    setStep(2);
+    if (!user) {
+      setError((prev) => ({
+        ...prev,
+        api: "You must be signed in to generate a summary.",
+      }));
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError({ title: "", content: "", api: "" });
+
+      const res = await fetch("/api/article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content, userId: user.id }),
+      });
+
+      const data = await res.json();
+      console.log(data.result, "gfhsdgh");
+      setSummary(data.result);
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create article");
+      }
+    } catch (err) {
+      setError((prev) => ({
+        ...prev,
+        api:
+          err instanceof Error
+            ? err.message
+            : "Something went wrong. Please try again.",
+      }));
+    } finally {
+      setLoading(false);
+      setStep(2);
+    }
   };
 
   return (
-    <div className="w-full h-screen bg-white flex flex-col">
+    <div className="w-full h-screen flex flex-col bg-white">
       <Header />
 
       <div className="flex flex-1 overflow-hidden">
@@ -50,82 +88,70 @@ export const HomeScreen = () => {
 
         <div className="flex-1 overflow-auto">
           {step === 1 && (
-            <div className="w-full max-h-max flex justify-center pt-10">
-              <div className="w-[856px] max-h-max border rounded-xl flex justify-center">
-                <div className="flex flex-col gap-6 p-6">
-                  <div className="flex gap-2 items-center">
-                    <PiStarFourBold className="w-6 h-6" />
-                    <p className="font-semibold text-2xl">
-                      Article Quiz Generator
+            <div className="w-full flex justify-center pt-10">
+              <div className="w-[856px] border rounded-xl p-6 flex flex-col gap-6">
+                <div className="flex gap-2 items-center">
+                  <PiStarFourBold className="w-6 h-6" />
+                  <p className="font-semibold text-2xl">
+                    Article Quiz Generator
+                  </p>
+                </div>
+
+                <p className="text-[#71717A]">
+                  Paste your article below to generate a summary and quiz
+                  questions. Your articles will be saved in the sidebar.
+                </p>
+
+                <div>
+                  <div className="flex gap-2 items-center mb-1">
+                    <IoDocumentTextOutline className="w-4 h-4" />
+                    <p className="text-sm font-semibold text-[#71717A]">
+                      Article Title
                     </p>
                   </div>
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter a title for your article..."
+                    className="w-full h-10 border rounded-xl px-2"
+                  />
+                  {error.title && (
+                    <p className="text-red-500 text-xs mt-1">{error.title}</p>
+                  )}
+                </div>
 
-                  <p className="text-[#71717A]">
-                    Paste your article below to generate a summary and quiz
-                    questions. Your articles will be saved in the sidebar.
-                  </p>
-
-                  <div>
-                    <div className="flex gap-2 items-center mb-1">
-                      <IoDocumentTextOutline className="w-4 h-4" />
-                      <p className="text-sm font-semibold text-[#71717A]">
-                        Article Title
-                      </p>
-                    </div>
-                    <input
-                      onChange={(e) => {
-                        settitle(e.target.value);
-                        setError((prev) => ({ ...prev, title: "" }));
-                      }}
-                      placeholder="Enter a title for your article..."
-                      className="w-full h-10 border rounded-xl px-2"
-                      value={title}
-                    />
-
-                    {error.title && (
-                      <p className="text-red-500 text-xs mt-1">{error.title}</p>
-                    )}
+                <div>
+                  <div className="flex gap-2 items-center mb-1">
+                    <IoDocumentTextOutline className="w-4 h-4" />
+                    <p className="text-sm font-semibold text-[#71717A]">
+                      Article Content
+                    </p>
                   </div>
+                  <Textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Paste your article content here..."
+                    className="w-full h-32 border rounded-xl px-2"
+                  />
+                  {error.content && (
+                    <p className="text-red-500 text-xs mt-1">{error.content}</p>
+                  )}
+                </div>
 
-                  <div>
-                    <div className="flex gap-2 items-center mb-1">
-                      <IoDocumentTextOutline className="w-4 h-4" />
-                      <p className="text-sm font-semibold text-[#71717A]">
-                        Article Content
-                      </p>
-                    </div>
-                    <Textarea
-                      value={content}
-                      onChange={(e) => {
-                        setcontent(e.target.value);
-                        setError((prev) => ({ ...prev, content: "" }));
-                      }}
-                      placeholder="Paste your article content here..."
-                      className="w-full h-32 border rounded-xl px-2"
-                    />
-
-                    {error.content && (
-                      <p className="text-red-500 text-xs mt-1">
-                        {error.content}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex justify-end">
-                    <button
-                      onClick={Handlenext}
-                      className="w-40 h-10 rounded-xl bg-black text-white cursor-pointer"
-                    >
-                      Generate summary
-                    </button>
-                  </div>
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleNext}
+                    disabled={loading}
+                    className="w-40 h-10 rounded-xl bg-black text-white disabled:opacity-50 cursor-pointer"
+                  >
+                    {loading ? "Generating..." : "Generate summary"}
+                  </button>
                 </div>
               </div>
             </div>
           )}
 
-          {step === 2 && <Summarize setStep={setStep} />}
-          {step === 3 && <Quiz />}
+          {step === 2 && <Summarize setStep={setStep} summary={summary} />}
         </div>
       </div>
     </div>

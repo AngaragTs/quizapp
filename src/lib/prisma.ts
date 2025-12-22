@@ -1,7 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../../generated/prisma/client";
-
-2;
+import { PrismaClient } from "../app/generated/prisma/client";
 
 const globalForPrisma = global as unknown as {
   prisma: PrismaClient;
