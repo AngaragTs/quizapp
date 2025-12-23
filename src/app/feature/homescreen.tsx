@@ -4,7 +4,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { PiStarFourBold } from "react-icons/pi";
 import { useState } from "react";
+
 import { useUser } from "@clerk/nextjs";
+import { useEffect } from "react";
 
 import { Summarize } from "./summarizescreen";
 import { Header } from "./header";
@@ -29,8 +31,23 @@ export const HomeScreen = () => {
     api: "",
   });
 
+  // useEffect(() => {
+  //   if (user) {
+  //     fetch("/api/User", {
+  //       method: "POST",
+  //       headers: {
+  //         "content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         clerkId: user.id,
+  //         email: user.primaryEmailAddress?.emailAddress,
+  //         name: user.fullName,
+  //       }),
+  //     });
+  //   }
+  // }, [user]);
+
   const handleNext = async () => {
-    // Validation
     if (!title.trim() || !content.trim()) {
       setError({
         title: !title ? "Article title is required" : "",

@@ -102,6 +102,7 @@ type SummarizeProps = {
 };
 export const Summarize = ({ setStep, summary }: SummarizedProps) => {
   const [showContent, setShowContent] = useState(false);
+
   console.log(summary, "summary");
 
   return (
@@ -170,7 +171,7 @@ export const Summarize = ({ setStep, summary }: SummarizedProps) => {
 
                 <button
                   onClick={() => setShowContent(false)}
-                  className="w-10 h-10 border flex items-center justify-center rounded-xl"
+                  className="w-10 h-10 border flex items-center justify-center rounded-xl cursor-pointer"
                 >
                   <IoMdClose />
                 </button>
