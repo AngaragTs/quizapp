@@ -8,22 +8,103 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { PiStarFourBold } from "react-icons/pi";
 import { PiBookOpenLight } from "react-icons/pi";
-import { HiChevronLeft } from "react-icons/hi2";
+import { HiChevronLeft, HiXMark } from "react-icons/hi2";
 
-export const Summarize = () => {
+interface HistoryItem {
+  id: string;
+  title: string;
+  content: string;
+  summary: string;
+  createdAt: string;
+}
+
+interface SummarizeProps {
+  onBack: () => void;
+  title: string;
+  content: string;
+  onSave: (summary: string) => void;
+  history: HistoryItem[];
+  onLoadHistory: (item: HistoryItem) => void;
+  preloadedSummary: string | null;
+}
+
+export const Summarize = ({ onBack, title, content, onSave, history, onLoadHistory, preloadedSummary }: SummarizeProps) => {
   const [sidebar, setSidebar] = useState(false);
   const [seecontent, setseecontent] = useState(false);
+  const [summary, setSummary] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [hasSaved, setHasSaved] = useState(false);
+
+  useEffect(() => {
+    // Reset states when content changes
+    setHasSaved(false);
+    setSummary("");
+    setLoading(true);
+
+    // If there's a preloaded summary (from history), use it
+    if (preloadedSummary) {
+      setSummary(preloadedSummary);
+      setLoading(false);
+      setHasSaved(true); // Already saved in history
+      return;
+    }
+
+    const summarizeContent = async () => {
+      try {
+        const response = await fetch("/api/summarize", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ content }),
+        });
+        const data = await response.json();
+        if (data.summary) {
+          setSummary(data.summary);
+          // Save to history when summary is generated
+          onSave(data.summary);
+          setHasSaved(true);
+        } else if (data.error) {
+          setSummary(`Error: ${data.error}`);
+        } else {
+          setSummary("No summary generated.");
+        }
+      } catch (error) {
+        console.error("Error summarizing:", error);
+        setSummary("Failed to summarize content. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (content && !preloadedSummary) {
+      summarizeContent();
+    }
+  }, [content, preloadedSummary]);
+
   return (
     <div className="w-full h-screen bg-white">
       {seecontent && (
         <div className="fixed w-screen h-screen bg-black/60 flex justify-center items-center ">
-          <div className="bg-white w-115 h-68 flex justify-around flex-col items-center rounded-2xl">
-            sdgdgsdgdgsgsgsfdgfsdg
+          <div className="bg-white w-115 h-auto flex flex-col rounded-2xl relative p-6">
+            <div className="flex justify-between items-center">
+              <p className="text-black font-bold text-lg">{title}</p>
+              <button
+                onClick={() => setseecontent(false)}
+                className="w-8 h-8 flex items-center justify-center cursor-pointer hover:bg-gray-100 rounded-xl border border-gray-300"
+              >
+                <HiXMark className="w-5 h-5 text-black" />
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <p className="text-black">{content}</p>
+            </div>
           </div>
         </div>
       )}
@@ -46,12 +127,29 @@ export const Summarize = () => {
 
       <div className="w-full h-full flex">
         {(sidebar && (
-          <div
-            className="h-full w-80 border-r-2 border-[#e4e4e7] flex justify-between pt-5 p-5"
-            onClick={() => setSidebar(false)}
-          >
-            <p className="text-xl font-semibold">History</p>
-            <GoSidebarExpand className="text-black w-8 h-8 cursor-pointer" />
+          <div className="h-full w-80 border-r-2 border-[#e4e4e7] flex flex-col pt-5 p-5">
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-xl font-semibold text-black">History</p>
+              <GoSidebarExpand 
+                onClick={() => setSidebar(false)}
+                className="text-black w-8 h-8 cursor-pointer" 
+              />
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {history.length === 0 ? (
+                <p className="text-[#71717A] text-sm">No history yet</p>
+              ) : (
+                history.map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => onLoadHistory(item)}
+                    className="p-3 border rounded-lg mb-2 cursor-pointer hover:bg-gray-50"
+                  >
+                    <p className="text-black font-medium truncate">{item.title}</p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         )) || (
           <div className="h-full w-[4%] border-r-2 border-[#e4e4e7]  flex justify-center pt-5">
@@ -64,8 +162,10 @@ export const Summarize = () => {
 
         <div className="w-full h-full flex flex-col px-72 items-center pt-10 ">
           <div className="w-214 mb-10">
-            {" "}
-            <button className="w-12 h-12 bg-white border rounded-xl flex items-center justify-center cursor-pointer">
+            <button 
+              onClick={onBack}
+              className="w-12 h-12 bg-white border rounded-xl flex items-center justify-center cursor-pointer"
+            >
               <HiChevronLeft />
             </button>
           </div>
@@ -87,7 +187,16 @@ export const Summarize = () => {
                 </p>
               </div>
 
-              <div className="w-200 h-50 "></div>
+              <div className="w-200 min-h-50 py-4">
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-[#737373]">Summarizing with AI...</p>
+                  </div>
+                ) : (
+                  <p className="text-black whitespace-pre-wrap">{summary}</p>
+                )}
+              </div>
 
               <div className="w-200 h-20 flex items-end justify-between">
                 <button
