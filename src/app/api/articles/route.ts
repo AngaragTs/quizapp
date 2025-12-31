@@ -1,29 +1,22 @@
-// import prisma from "@/lib/prisma";
-
 import prisma from "@/lib/prisma";
-
-// export const GET = async (request: Request) => {
-//   try {
-//     const article = await prisma.article.findMany();
-//     return new Response(JSON.stringify({ article }), { status: 200 });
-//   } catch (err) {
-//     console.log(err);
-//     return new Response("Failed to fetch articles", { status: 500 });
-//   }
-// };
-// export const POST = async (request: Request) => {
-//   const article = await prisma.article.create({
-//     data: await request.json(),
-//   });
-
-//   return new Response(JSON.stringify({ article }), { status: 201 });
-// };
+import { getOrCreateUser } from "@/lib/user";
 
 export const GET = async () => {
   try {
-    const articles = await prisma.article.findMany();
+    const user = await getOrCreateUser();
 
-    return new Response(JSON.stringify(articles), {
+    if (!user) {
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
+    const userWithArticles = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { articles: { orderBy: { createdAt: "desc" } } },
+    });
+
+    return new Response(JSON.stringify(userWithArticles?.articles || []), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -38,17 +31,32 @@ export const GET = async () => {
 
 export const POST = async (request: Request) => {
   try {
+    const user = await getOrCreateUser();
+
+    if (!user) {
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
     const body = await request.json();
 
-    if (!body.title || !body.content) {
+    if (!body.title || !body.content || !body.summary) {
       return new Response(
-        JSON.stringify({ message: "Missing required fields" }),
+        JSON.stringify({
+          message: "Missing required fields (title, content, summary)",
+        }),
         { status: 400 }
       );
     }
 
     const article = await prisma.article.create({
-      data: {},
+      data: {
+        title: body.title,
+        content: body.content,
+        summary: body.summary,
+        userId: user.id,
+      },
     });
 
     return new Response(JSON.stringify(article), {
@@ -56,7 +64,7 @@ export const POST = async (request: Request) => {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error creating article:", error);
     return new Response(
       JSON.stringify({ message: "Failed to create article" }),
       { status: 500 }
