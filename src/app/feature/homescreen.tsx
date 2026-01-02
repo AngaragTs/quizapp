@@ -15,6 +15,27 @@ import {
   useAuth,
 } from "@clerk/nextjs";
 import { Summarize } from "./summarizescreen";
+import { QuizScreen } from "./quizscreen";
+
+const formatRelativeDate = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffTime = now.getTime() - date.getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return "Today";
+  } else if (diffDays === 1) {
+    return "Yesterday";
+  } else if (diffDays <= 7) {
+    return `${diffDays} days ago`;
+  } else if (diffDays <= 30) {
+    const weeks = Math.floor(diffDays / 7);
+    return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+  } else {
+    return date.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  }
+};
 
 export interface HistoryItem {
   id: string;
@@ -108,7 +129,17 @@ export const HomeScreen = () => {
       {step === 1 && (
         <div className="w-full h-screen bg-white">
           <div className="w-full h-15 flex border-b-2 items-center justify-between p-5">
-            <p className="text-2xl font-semibold text-black ">Quiz app</p>
+            <p
+              onClick={() => {
+                setStep(1);
+                setTitle("");
+                setContent("");
+                setPreloadedSummary(null);
+              }}
+              className="text-2xl font-semibold text-black cursor-pointer hover:text-gray-700"
+            >
+              Quiz app
+            </p>
             <header className="flex justify-end items-center p-4 gap-4 h-16">
               <SignedOut>
                 <SignInButton />
@@ -144,6 +175,9 @@ export const HomeScreen = () => {
                         onClick={() => loadFromHistory(item)}
                         className="p-3 rounded-lg mb-2 cursor-pointer hover:bg-gray-50"
                       >
+                        <p className="text-[#71717A] text-xs mb-1">
+                          {formatRelativeDate(item.createdAt)}
+                        </p>
                         <p className="text-black font-medium truncate">
                           {item.title}
                         </p>
@@ -232,13 +266,34 @@ export const HomeScreen = () => {
       )}
       {step === 2 && (
         <Summarize
-          onBack={() => setStep(1)}
+          onBack={() => {
+            setStep(1);
+            setTitle("");
+            setContent("");
+            setPreloadedSummary(null);
+          }}
+          onTakeQuiz={() => setStep(3)}
           title={title}
           content={content}
           onSave={saveToHistory}
           history={history}
           onLoadHistory={loadFromHistory}
           preloadedSummary={preloadedSummary}
+        />
+      )}
+      {step === 3 && (
+        <QuizScreen
+          onBack={() => setStep(2)}
+          onHome={() => {
+            setStep(1);
+            setTitle("");
+            setContent("");
+            setPreloadedSummary(null);
+          }}
+          title={title}
+          content={content}
+          history={history}
+          onLoadHistory={loadFromHistory}
         />
       )}
     </>

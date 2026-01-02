@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { HomeScreen } from "./feature/homescreen";
 import { Summarize } from "./feature/summarizescreen";
+import { QuizScreen } from "./feature/quizscreen";
 
 export default async function Home() {
   // const users = await prisma.user.findMany();
@@ -9,7 +10,6 @@ export default async function Home() {
   return (
     <div>
       <HomeScreen />
-    
     </div>
   );
 }

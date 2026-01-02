@@ -29,7 +29,7 @@ export const POST = async (request: Request) => {
       );
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `Based on the following article titled "${title}", generate exactly 5 multiple choice quiz questions to test understanding of the content.
 
