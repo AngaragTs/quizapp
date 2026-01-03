@@ -9,7 +9,7 @@ import {
 } from "@clerk/nextjs";
 import { useState, useEffect } from "react";
 import { GoSidebarCollapse, GoSidebarExpand } from "react-icons/go";
-import { HiXMark } from "react-icons/hi2";
+import { HiXMark, HiArrowPath, HiBookmark } from "react-icons/hi2";
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { PiStarFourBold } from "react-icons/pi";
 
@@ -46,6 +46,7 @@ interface QuizScreenProps {
   onHome: () => void;
   title: string;
   content: string;
+  articleId: string | null;
   history: HistoryItem[];
   onLoadHistory: (item: HistoryItem) => void;
 }
@@ -61,6 +62,7 @@ export const QuizScreen = ({
   onHome,
   title,
   content,
+  articleId,
   history,
   onLoadHistory,
 }: QuizScreenProps) => {
@@ -73,6 +75,7 @@ export const QuizScreen = ({
   const [answeredQuestions, setAnsweredQuestions] = useState<boolean[]>([]);
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   useEffect(() => {
     const generateQuiz = async () => {
@@ -82,7 +85,7 @@ export const QuizScreen = ({
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ title, content }),
+          body: JSON.stringify({ title, content, articleId }),
         });
         const data = await response.json();
 
@@ -101,7 +104,7 @@ export const QuizScreen = ({
     };
 
     generateQuiz();
-  }, [title, content]);
+  }, [title, content, articleId]);
 
   const handleSelectAnswer = (option: string) => {
     if (answeredQuestions[currentQuestion]) return;
@@ -211,18 +214,60 @@ export const QuizScreen = ({
           {/* Quiz Container */}
           <div className="w-214 min-h-fit ">
             {/* Title */}
-            <div className="flex items-center justify-between mb-6">
+            <div
+              className={`flex items-center justify-between ${
+                showResult ? "mb-1" : "mb-6"
+              }`}
+            >
               <div className="flex gap-2 items-center">
                 <PiStarFourBold className="text-black w-6 h-6" />
-                <p className="font-semibold text-2xl text-black">Quick test</p>
+                <p className="font-semibold text-2xl text-black">
+                  {showResult ? "Quiz completed" : "Quick test"}
+                </p>
               </div>
               <button
-                onClick={onBack}
+                onClick={() => setShowExitConfirm(true)}
                 className="w-12 h-12 bg-white border rounded-xl flex items-center justify-center cursor-pointer hover:bg-gray-50"
               >
                 <HiXMark className="text-black w-5 h-5" />
               </button>
             </div>
+            {showResult && (
+              <div className="mb-6">
+                <p className="text-[#71717A] text-base">
+                  Let's see what you did
+                </p>
+              </div>
+            )}
+
+            {/* Exit Confirmation Modal */}
+            {showExitConfirm && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4">
+                  <p className="text-xl font-semibold text-black mb-2">
+                    Are you sure?
+                  </p>
+                  <p className="text-gray-600 mb-6">
+                    If you press 'Cancel', this quiz will restart from the
+                    beginning.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setShowExitConfirm(false)}
+                      className="flex-1 px-4 py-3 bg-black text-white rounded-xl cursor-pointer hover:bg-gray-800"
+                    >
+                      Go back
+                    </button>
+                    <button
+                      onClick={onBack}
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 text-black"
+                    >
+                      Cancel quiz
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {loading ? (
               <div className="flex flex-col items-center justify-center py-20 ">
@@ -246,37 +291,20 @@ export const QuizScreen = ({
               </div>
             ) : showResult ? (
               <div className="flex flex-col py-10">
-                <div className="flex items-center justify-center gap-4 mb-8">
-                  <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center">
-                    <p className="text-4xl font-bold text-green-600">
-                      {score}/{questions.length}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-semibold text-black">
-                      Quiz Complete!
-                    </p>
-                    <p className="text-gray-600">
-                      You got {score} out of {questions.length} questions
-                      correct
-                    </p>
-                  </div>
-                </div>
-
                 {/* Results breakdown */}
-                <div className="space-y-4 mb-8">
+                <div className="space-y-4 mb-8 p-4 rounded-xl bg-white border border-gray-200">
+                  <p className="text-black">
+                    Your Score{" "}
+                    <span className="font-bold">
+                      {score}/{questions.length}
+                    </span>{" "}
+                    correct
+                  </p>
                   {questions.map((q, index) => {
                     const userAnswer = userAnswers[index];
                     const isCorrect = userAnswer === q.answer;
                     return (
-                      <div
-                        key={index}
-                        className={`p-4 rounded-xl border-2 ${
-                          isCorrect
-                            ? "border-green-500 bg-green-50"
-                            : "border-red-500 bg-red-50"
-                        }`}
-                      >
+                      <div key={index} className="p-4 rounded-xl">
                         <div className="flex items-start gap-3">
                           <div className="mt-1">
                             {isCorrect ? (
@@ -314,21 +342,22 @@ export const QuizScreen = ({
                       </div>
                     );
                   })}
-                </div>
-
-                <div className="flex gap-4 justify-center">
-                  <button
-                    onClick={handleRetake}
-                    className="px-8 py-4 bg-black text-white rounded-xl cursor-pointer hover:bg-gray-800 text-lg"
-                  >
-                    Retake Quiz
-                  </button>
-                  <button
-                    onClick={onBack}
-                    className="px-8 py-4 border border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 text-lg"
-                  >
-                    Back to Summary
-                  </button>
+                  <div className="flex gap-4 justify-center mt-4">
+                    <button
+                      onClick={handleRetake}
+                      className="px-8 py-4 border border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 text-lg flex items-center gap-2 text-black"
+                    >
+                      <HiArrowPath className="w-5 h-5" />
+                      Restart quiz
+                    </button>
+                    <button
+                      onClick={onBack}
+                      className="px-8 py-4 bg-black text-white rounded-xl cursor-pointer hover:bg-gray-800 text-lg flex items-center gap-2"
+                    >
+                      <HiBookmark className="w-5 h-5" />
+                      Save and leave
+                    </button>
+                  </div>
                 </div>
               </div>
             ) : currentQ ? (
@@ -336,22 +365,29 @@ export const QuizScreen = ({
                 <p className="text-[#71717A] text-sm mb-8">
                   Take a quick test about your knowledge from your content
                 </p>
-                {/* Question */}
-                <p className="text-xl font-semibold text-black mb-8">
-                  {currentQ.question}
-                </p>
+                {/* Question and Options */}
+                <div className="border-2 border-gray-200 rounded-xl p-6">
+                  <div className="flex justify-between items-start mb-6">
+                    <p className="text-xl font-semibold text-black pr-4">
+                      {currentQ.question}
+                    </p>
+                    <span className="text-[#71717A] text-sm whitespace-nowrap font-bold">
+                      {currentQuestion + 1}/{questions.length}
+                    </span>
+                  </div>
 
-                {/* Options */}
-                <div className="space-y-4 mb-8">
-                  {currentQ.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSelectAnswer(option)}
-                      className="w-full p-5 text-left border-2 border-gray-300 rounded-xl bg-white hover:bg-gray-50 transition-all cursor-pointer"
-                    >
-                      <span className="text-black text-lg">{option}</span>
-                    </button>
-                  ))}
+                  {/* Options */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {currentQ.options.map((option, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSelectAnswer(option)}
+                        className="p-3 text-left border-2 border-gray-300 rounded-xl bg-white hover:bg-gray-50 transition-all cursor-pointer"
+                      >
+                        <span className="text-black text-sm">{option}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : null}

@@ -53,6 +53,7 @@ export const HomeScreen = () => {
   const [showSignInMessage, setShowSignInMessage] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [preloadedSummary, setPreloadedSummary] = useState<string | null>(null);
+  const [articleId, setArticleId] = useState<string | null>(null);
   const { isSignedIn } = useAuth();
 
   useEffect(() => {
@@ -92,14 +93,17 @@ export const HomeScreen = () => {
     fetchArticles();
   }, [isSignedIn]);
 
-  const saveToHistory = (summary: string, articleId?: string) => {
+  const saveToHistory = (summary: string, newArticleId?: string) => {
     const newItem: HistoryItem = {
-      id: articleId || Date.now().toString(),
+      id: newArticleId || Date.now().toString(),
       title,
       content,
       summary,
       createdAt: new Date().toISOString(),
     };
+    if (newArticleId) {
+      setArticleId(newArticleId);
+    }
     const updatedHistory = [newItem, ...history];
     setHistory(updatedHistory);
     localStorage.setItem("quizHistory", JSON.stringify(updatedHistory));
@@ -109,6 +113,7 @@ export const HomeScreen = () => {
     setTitle(item.title);
     setContent(item.content);
     setPreloadedSummary(item.summary);
+    setArticleId(item.id);
     setStep(2);
   };
 
@@ -289,9 +294,11 @@ export const HomeScreen = () => {
             setTitle("");
             setContent("");
             setPreloadedSummary(null);
+            setArticleId(null);
           }}
           title={title}
           content={content}
+          articleId={articleId}
           history={history}
           onLoadHistory={loadFromHistory}
         />

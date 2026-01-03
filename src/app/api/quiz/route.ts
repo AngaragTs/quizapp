@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import prisma from "@/lib/prisma";
 
 export interface QuizQuestion {
   question: string;
@@ -20,7 +21,7 @@ export const POST = async (request: Request) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const { title, content } = await request.json();
+    const { title, content, articleId } = await request.json();
 
     if (!title || !content) {
       return new Response(
@@ -64,6 +65,27 @@ Example format:
 
     // Parse the JSON
     const questions: QuizQuestion[] = JSON.parse(cleanedText);
+
+    // Save quiz questions to database if articleId is provided
+    if (articleId) {
+      const savedQuizzes = await Promise.all(
+        questions.map((q) =>
+          prisma.quiz.create({
+            data: {
+              question: q.question,
+              options: q.options,
+              answer: q.answer,
+              articleId: articleId,
+            },
+          })
+        )
+      );
+
+      return new Response(
+        JSON.stringify({ questions, quizIds: savedQuizzes.map((q) => q.id) }),
+        { status: 200 }
+      );
+    }
 
     return new Response(JSON.stringify({ questions }), { status: 200 });
   } catch (error: unknown) {
